@@ -14,7 +14,7 @@ export default class Recipe {
       this.url = res.data.recipe.source_url;
       this.ingredients = res.data.recipe.ingredients;
     } catch (err) {
-      console.log(err);
+      console.log(`Something wrong with get recipe: ${err}`);
     }
   }
   calcTime() {

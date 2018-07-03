@@ -14,7 +14,7 @@ const state = {};
 /**
  * SEARCH CONTROLLER
  */
-const SearchCtrl = async () => {
+const searchCtrl = async () => {
   // Get query from view
   const query = searchView.getInput();
   if (query) {
@@ -25,18 +25,23 @@ const SearchCtrl = async () => {
     searchView.clearResults();
     renderLoader(elements.searchRes);
 
-    // Search for recipes
-    await state.search.getResults();
+    try {
+      // Search for recipes
+      await state.search.getResults();
 
-    // Render results on UI
-    clearLoader();
-    searchView.renderResults(state.search.result);
+      // Render results on UI
+      clearLoader();
+      searchView.renderResults(state.search.result);
+    } catch (err) {
+      console.log(`Error processing search: ${err}`);
+      clearLoader();
+    }
   }
 };
 
 elements.searchForm.addEventListener('submit', e => {
   e.preventDefault();
-  SearchCtrl();
+  searchCtrl();
 });
 
 elements.searchResPages.addEventListener('click', e => {
@@ -51,6 +56,29 @@ elements.searchResPages.addEventListener('click', e => {
 /**
  * RECIPE CONTROLLER
  */
-const recipe = new Recipe(46882);
-recipe.getRecipe();
-console.log(recipe);
+const recipeCtrl = async () => {
+  // Get id from url
+  const id = window.location.hash.replace('#', '');
+  if (id) {
+    // Prepare UI for changes
+
+    // Create new recipe object
+    state.recipe = new Recipe(id);
+
+    try {
+      // Get recipe data
+      await state.recipe.getRecipe();
+
+      // Calculate serving and time
+      state.recipe.calcTime();
+      state.recipe.calcServings();
+
+      // Render recipe
+      console.log(state.recipe);
+    } catch (err) {
+      console.log(`Error processing recipe: ${err}`);
+    }
+  }
+};
+
+['hashchange', 'load'].forEach(event => window.addEventListener(event, recipeCtrl));
